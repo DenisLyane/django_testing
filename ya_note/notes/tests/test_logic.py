@@ -18,12 +18,11 @@ class TestNoteCreation(TestCase):
     SLUG = 'Slug'
 
     @classmethod
-    def setUpTestData(cls):
-        cls.url = reverse('notes:add', None)
+    def setUp(cls):
         cls.user = User.objects.create(username='Гость')
         cls.auth_client = Client()
         cls.auth_client.force_login(cls.user)
-
+        cls.url = reverse('notes:add', None)
         cls.form_data = {
             'text': cls.NOTE_TEXT,
             'slug': cls.SLUG,
@@ -79,22 +78,15 @@ class TestNoteCreation(TestCase):
 class TestSlugUnic(TestCase):
 
     TITLE = 'Заголовок'
-
     TEXT = 'Заметка'
-
     SLUG = 'Slug'
 
     @classmethod
-    def setUpTestData(cls):
-
+    def setUp(cls):
         cls.url = reverse('notes:add')
-
         cls.user = User.objects.create(username='Гость')
-
         cls.auth_client = Client()
-
         cls.auth_client.force_login(cls.user)
-
         cls.note = Note.objects.create(
             title=cls.TITLE,
             text=cls.TEXT,
@@ -102,13 +94,12 @@ class TestSlugUnic(TestCase):
             slug=cls.SLUG
         )
 
-        cls.form_data = {'text': cls.TEXT,
-
-                         'slug': cls.SLUG,
-
-                         'author': cls.user,
-
-                         'title': cls.TITLE}
+        cls.form_data = {
+            'text': cls.TEXT,
+            'slug': cls.SLUG,
+            'author': cls.user,
+            'title': cls.TITLE
+        }
 
     def test_not_unique_slug(self):
         """Невозможно создать две заметки с одинаковым slug."""
@@ -124,36 +115,22 @@ class TestSlugUnic(TestCase):
 
 
 class TestNoteEditDelete(TestCase):
-
     TITLE = 'Заголовок'
-
     TEXT = 'Заметка'
-
     SLUG = 'Slug_1'
-
     NEXT_TITLE = 'Заголовок второй'
-
     NEXT_TEXT = 'Заметка вторая'
-
     NEXT_SLUG = 'Slug_2'
 
     @classmethod
-    def setUpTestData(cls):
-
-        cls.url = reverse('notes:add')
-
+    def setUp(cls):
         cls.author = User.objects.create(username='Автор')
-
         cls.author_client = Client()
-
         cls.author_client.force_login(cls.author)
-
         cls.reader = User.objects.create(username='Читатель')
-
         cls.reader_client = Client()
-
         cls.reader_client.force_login(cls.reader)
-
+        cls.url = reverse('notes:add')
         cls.note = Note.objects.create(
             title=cls.TITLE, text=cls.TEXT,
             slug=cls.SLUG,

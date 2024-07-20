@@ -1,3 +1,4 @@
+import random
 from http import HTTPStatus
 
 from django.urls import reverse
@@ -18,11 +19,13 @@ def test_create_comment(
     id_for_args
 ):
     url = reverse('news:detail', args=(id_for_args))
-    client.post(url, data=form_data)
+    response = client.post(url, data=form_data)
+    assert response.status_code == HTTPStatus.FOUND
     comments_count = Comment.objects.count()
     assert comments_count == 0
 
     response = author_client.post(url, data=form_data)
+    assert response.status_code == HTTPStatus.FOUND
     assertRedirects(response, f'{url}#comments')
 
     comments_count = Comment.objects.count()
@@ -37,8 +40,10 @@ def test_create_comment(
 @pytest.mark.django_db
 def test_user_cant_use_bad_words(author_client, id_for_args):
     url = reverse('news:detail', args=(id_for_args))
-    bad_words_data = {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
+    bad_words_data = {
+        'text': f'Какой-то текст, {random.choice(BAD_WORDS)}, еще текст'}
     response = author_client.post(url, data=bad_words_data)
+    assert response.status_code == HTTPStatus.OK
     assertFormError(response, 'form', 'text', errors=WARNING)
 
     comments_count = Comment.objects.count()
@@ -50,6 +55,7 @@ def test_user_cant_use_bad_words(author_client, id_for_args):
 def test_author_can_delete_comment(author_client, comment, id_for_args):
     url = reverse('news:delete', args=(comment.id,))
     response = author_client.delete(url)
+    assert response.status_code == HTTPStatus.FOUND
     url_to_comments = reverse('news:detail', args=(id_for_args)) + '#comments'
     assertRedirects(response, url_to_comments)
 
@@ -70,6 +76,17 @@ def test_user_cant_delete_comment_of_another_user(not_author_client, comment):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures('comment')
+def test_anonymous_cant_delete_comment_of_another_user(client, comment):
+    url = reverse('news:delete', args=(comment.id,))
+    response = client.delete(url)
+    assert response.status_code == HTTPStatus.FOUND
+
+    comments_count = Comment.objects.count()
+    assert comments_count == 1
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('comment')
 def test_author_can_edit_comment(
     author_client,
     comment,
@@ -78,6 +95,7 @@ def test_author_can_edit_comment(
 ):
     url = reverse('news:edit', args=(comment.id,))
     response = author_client.post(url, data=form_data)
+    assert response.status_code == HTTPStatus.FOUND
     url_to_comments = reverse('news:detail', args=(id_for_args)) + '#comments'
     assertRedirects(response, url_to_comments)
 
@@ -88,6 +106,20 @@ def test_author_can_edit_comment(
 @pytest.mark.django_db
 @pytest.mark.usefixtures('comment')
 def test_user_cant_edit_comment_of_another_user(
+    not_author_client,
+    comment,
+    form_data
+):
+    url = reverse('news:edit', args=(comment.id,))
+    response = not_author_client.post(url, data=form_data)
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    comment.refresh_from_db()
+    assert comment.text == comment.text
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('comment')
+def test_anonymous_cant_edit_comment_of_another_user(
     not_author_client,
     comment,
     form_data

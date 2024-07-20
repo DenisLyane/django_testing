@@ -58,4 +58,5 @@ def test_redirects(client, name, args):
     url = reverse(name, args=args)
     expected_url = f'{login_url}?next={url}'
     response = client.get(url)
+    assert response.status_code == HTTPStatus.FOUND
     assertRedirects(response, expected_url)

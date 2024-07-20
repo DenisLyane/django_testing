@@ -12,7 +12,7 @@ User = get_user_model()
 class TestRoutes(TestCase):
 
     @classmethod
-    def setUpTestData(cls):
+    def setUp(cls):
         cls.author = User.objects.create(username='Автор')
         cls.reader = User.objects.create(username='Читатель простой')
         cls.note = Note.objects.create(

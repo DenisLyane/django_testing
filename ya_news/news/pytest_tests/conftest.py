@@ -87,7 +87,7 @@ def list_comments(news, author):
 @pytest.fixture
 def form_data():
     return {
-        'text': 'Новый текст',
+        'text': 'Текст комментария'
     }
 
 
