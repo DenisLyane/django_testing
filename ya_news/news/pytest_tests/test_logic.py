@@ -65,21 +65,21 @@ def test_author_can_delete_comment(author_client, comment, id_for_args):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures('comment')
-def test_user_cant_delete_comment_of_another_user(not_author_client, comment):
+@pytest.mark.parametrize(
+    'parametrized_client, expected_status',
+    (
+        (pytest.lazy_fixture('not_author_client'), HTTPStatus.NOT_FOUND),
+        (pytest.lazy_fixture('client'), HTTPStatus.FOUND)
+    ),
+)
+def test_anonymous_and_user_cant_delete_comment_of_another_user(
+    parametrized_client,
+    comment,
+    expected_status
+):
     url = reverse('news:delete', args=(comment.id,))
-    response = not_author_client.delete(url)
-    assert response.status_code == HTTPStatus.NOT_FOUND
-
-    comments_count = Comment.objects.count()
-    assert comments_count == 1
-
-
-@pytest.mark.django_db
-@pytest.mark.usefixtures('comment')
-def test_anonymous_cant_delete_comment_of_another_user(client, comment):
-    url = reverse('news:delete', args=(comment.id,))
-    response = client.delete(url)
-    assert response.status_code == HTTPStatus.FOUND
+    response = parametrized_client.delete(url)
+    assert response.status_code == expected_status
 
     comments_count = Comment.objects.count()
     assert comments_count == 1
@@ -105,27 +105,21 @@ def test_author_can_edit_comment(
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures('comment')
-def test_user_cant_edit_comment_of_another_user(
-    not_author_client,
+@pytest.mark.parametrize(
+    'parametrized_client, expected_status',
+    (
+        (pytest.lazy_fixture('not_author_client'), HTTPStatus.NOT_FOUND),
+        (pytest.lazy_fixture('client'), HTTPStatus.FOUND)
+    ),
+)
+def test_anonymous_and_user_cant_edit_comment_of_another_user(
     comment,
-    form_data
+    form_data,
+    parametrized_client,
+    expected_status
 ):
     url = reverse('news:edit', args=(comment.id,))
-    response = not_author_client.post(url, data=form_data)
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    comment.refresh_from_db()
-    assert comment.text == comment.text
-
-
-@pytest.mark.django_db
-@pytest.mark.usefixtures('comment')
-def test_anonymous_cant_edit_comment_of_another_user(
-    not_author_client,
-    comment,
-    form_data
-):
-    url = reverse('news:edit', args=(comment.id,))
-    response = not_author_client.post(url, data=form_data)
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    response = parametrized_client.post(url, data=form_data)
+    assert response.status_code == expected_status
     comment.refresh_from_db()
     assert comment.text == comment.text

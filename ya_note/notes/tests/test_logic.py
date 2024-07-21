@@ -17,23 +17,22 @@ class TestNoteCreation(TestCase):
     TITLE = 'Заголовок'
     SLUG = 'Slug'
 
-    @classmethod
-    def setUp(cls):
-        cls.user = User.objects.create(username='Гость')
-        cls.auth_client = Client()
-        cls.auth_client.force_login(cls.user)
-        cls.url = reverse('notes:add', None)
-        cls.form_data = {
-            'text': cls.NOTE_TEXT,
-            'slug': cls.SLUG,
-            'author': cls.user,
-            'title': cls.TITLE
+    def setUp(self):
+        self.user = User.objects.create(username='Гость')
+        self.auth_client = Client()
+        self.auth_client.force_login(self.user)
+        self.url = reverse('notes:add', None)
+        self.form_data = {
+            'text': self.NOTE_TEXT,
+            'slug': self.SLUG,
+            'author': self.user,
+            'title': self.TITLE
         }
 
-        cls.form_data_no_slug = {
-            'text': cls.NOTE_TEXT,
-            'author': cls.user,
-            'title': cls.TITLE
+        self.form_data_no_slug = {
+            'text': self.NOTE_TEXT,
+            'author': self.user,
+            'title': self.TITLE
         }
 
     def test_user_can_create_note(self):
@@ -81,24 +80,23 @@ class TestSlugUnic(TestCase):
     TEXT = 'Заметка'
     SLUG = 'Slug'
 
-    @classmethod
-    def setUp(cls):
-        cls.url = reverse('notes:add')
-        cls.user = User.objects.create(username='Гость')
-        cls.auth_client = Client()
-        cls.auth_client.force_login(cls.user)
-        cls.note = Note.objects.create(
-            title=cls.TITLE,
-            text=cls.TEXT,
-            author=cls.user,
-            slug=cls.SLUG
+    def setUp(self):
+        self.url = reverse('notes:add')
+        self.user = User.objects.create(username='Гость')
+        self.auth_client = Client()
+        self.auth_client.force_login(self.user)
+        self.note = Note.objects.create(
+            title=self.TITLE,
+            text=self.TEXT,
+            author=self.user,
+            slug=self.SLUG
         )
 
-        cls.form_data = {
-            'text': cls.TEXT,
-            'slug': cls.SLUG,
-            'author': cls.user,
-            'title': cls.TITLE
+        self.form_data = {
+            'text': self.TEXT,
+            'slug': self.SLUG,
+            'author': self.user,
+            'title': self.TITLE
         }
 
     def test_not_unique_slug(self):
@@ -122,30 +120,29 @@ class TestNoteEditDelete(TestCase):
     NEXT_TEXT = 'Заметка вторая'
     NEXT_SLUG = 'Slug_2'
 
-    @classmethod
-    def setUp(cls):
-        cls.author = User.objects.create(username='Автор')
-        cls.author_client = Client()
-        cls.author_client.force_login(cls.author)
-        cls.reader = User.objects.create(username='Читатель')
-        cls.reader_client = Client()
-        cls.reader_client.force_login(cls.reader)
-        cls.url = reverse('notes:add')
-        cls.note = Note.objects.create(
-            title=cls.TITLE, text=cls.TEXT,
-            slug=cls.SLUG,
-            author=cls.author
+    def setUp(self):
+        self.author = User.objects.create(username='Автор')
+        self.author_client = Client()
+        self.author_client.force_login(self.author)
+        self.reader = User.objects.create(username='Читатель')
+        self.reader_client = Client()
+        self.reader_client.force_login(self.reader)
+        self.url = reverse('notes:add')
+        self.note = Note.objects.create(
+            title=self.TITLE, text=self.TEXT,
+            slug=self.SLUG,
+            author=self.author
         )
 
-        cls.note_url = reverse('notes:detail', args=(cls.note.slug,))
-        cls.edit_url = reverse('notes:edit', args=(cls.note.slug,))
-        cls.delete_url = reverse('notes:delete', args=(cls.note.slug,))
+        self.note_url = reverse('notes:detail', args=(self.note.slug,))
+        self.edit_url = reverse('notes:edit', args=(self.note.slug,))
+        self.delete_url = reverse('notes:delete', args=(self.note.slug,))
 
-        cls.form_data = {
-            'text': cls.NEXT_TEXT,
-            'slug': cls.NEXT_SLUG,
-            'author': cls.author,
-            'title': cls.NEXT_TITLE
+        self.form_data = {
+            'text': self.NEXT_TEXT,
+            'slug': self.NEXT_SLUG,
+            'author': self.author,
+            'title': self.NEXT_TITLE
         }
 
     def test_author_can_delete_note(self):
