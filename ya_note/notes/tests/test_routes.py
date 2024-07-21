@@ -11,15 +11,14 @@ User = get_user_model()
 
 class TestRoutes(TestCase):
 
-    @classmethod
-    def setUp(cls):
-        cls.author = User.objects.create(username='Автор')
-        cls.reader = User.objects.create(username='Читатель простой')
-        cls.note = Note.objects.create(
+    def setUp(self):
+        self.author = User.objects.create(username='Автор')
+        self.reader = User.objects.create(username='Читатель простой')
+        self.note = Note.objects.create(
             title='Заголовок',
             text='Текст',
             slug='Slug',
-            author=cls.author
+            author=self.author
         )
 
     def test_pages_availability_for_anonymous_user(self):

@@ -12,15 +12,14 @@ class TestRoutes(TestCase):
 
     LIST_URL = reverse('notes:list')
 
-    @classmethod
-    def setUp(cls):
-        cls.author = User.objects.create(username='Автор')
-        cls.reader = User.objects.create(username='Читатель простой')
-        cls.note = Note.objects.create(
+    def setUp(self):
+        self.author = User.objects.create(username='Автор')
+        self.reader = User.objects.create(username='Читатель простой')
+        self.note = Note.objects.create(
             title='Заголовок',
             text='Текст',
             slug='Slug',
-            author=cls.author
+            author=self.author
         )
 
     def test_notes_list_for_different_users(self):
